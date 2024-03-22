@@ -1,0 +1,2 @@
+class SubdivisionController < ApplicationController
+end
