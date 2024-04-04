@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "3.0.6"
+ruby "3.2.2"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.3", ">= 7.1.3.2"
@@ -38,6 +38,8 @@ gem "rack-cors"
 gem 'bcrypt'
 
 gem 'pg'
+
+gem "aws-sdk-s3", "~> 1.14"
 
 gem 'shrine', '~> 3.5'
 
