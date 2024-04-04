@@ -2,6 +2,8 @@ class WaterBilling < ApplicationRecord
 
     include StatusList
     
+    attr_accessor :image
+    
     has_many :photos, dependent: :destroy
     
     accepts_nested_attributes_for :photos, allow_destroy: true
