@@ -6,7 +6,7 @@ class WaterBillingRepository
         self.subdivision_id = subdivision_id
         self.params = params
         self.status = params["status"] || "Select status"
-        self.year = params["year_list"] || Time.now.year
+        self.year = params["year"] || Time.now.year
         self.month =  params["month"] || "Select month"
         self.where_clause = {}
     end
