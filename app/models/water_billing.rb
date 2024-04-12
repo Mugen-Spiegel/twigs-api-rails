@@ -9,7 +9,7 @@ class WaterBilling < ApplicationRecord
     accepts_nested_attributes_for :photos, allow_destroy: true
 
     has_many :water_billing_transactions, dependent: :destroy
-    validate :validation_current_reading_billing?
+    validate :validation_current_reading_billing?, on: :create
     validates :month, :year, :mother_meter_current_reading, presence: true, on: :create
     validate :validation_month_billing?, on: :create
     belongs_to :subdivision
@@ -34,8 +34,8 @@ class WaterBilling < ApplicationRecord
     def validation_current_reading_billing?
         
         water_billing = WaterBilling.last
-        puts self&.mother_meter_current_reading, water_billing&.mother_meter_current_reading, self&.mother_meter_current_reading > water_billing&.mother_meter_current_reading
         unless water_billing.nil?
+            puts self.to_json, water_billing.to_json, water_billing.nil?
             unless self&.mother_meter_current_reading > water_billing&.mother_meter_current_reading
                 errors.add(:current_reading,  "should greater than the previous reading")
             end
