@@ -4,6 +4,7 @@ class MonthlyDueTransaction < ApplicationRecord
 
     belongs_to :user
     belongs_to :subdivision
+    belongs_to :monthly_due
     validates :block, :lot, uniqueness: { scope: %i[year month user_id], message: "Transaction Exists" }
     validates :is_paid, :bill_amount, :user_id, :year, :month, :monthly_due_id, presence: true
 
