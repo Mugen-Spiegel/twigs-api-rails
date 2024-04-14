@@ -28,57 +28,61 @@ class WaterBillingController < ApplicationController
   
     # PATCH/PUT /water_billings/1 or /water_billings/1.json
     def update
-      updates_billing_params = WaterBillingRepository.set_up_update_param(@water_billing, water_billing_params)
-      respond_to do |format|
+      begin
+        updates_billing_params = WaterBillingRepository.set_up_update_param(@water_billing, water_billing_params)
         unless updates_billing_params[:bill_amount].nil?
           attri = :bill_amount
         else
           attri = :paid_amount
         end
         if @water_billing.update_attribute(attri, updates_billing_params[attri])
-          format.html { redirect_to water_billing_index_path({subdivision_id: @water_billing.subdivision_id}), notice: "Water Billing was successfully updated." }
-          format.json { render :show, status: :updated, location: @water_billing }
+          @total_current_reading = WaterBillingTransactionRepository.sum_current_reading_by_month(@water_billing.year || Time.now.year)
         else
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @water_billing.errors, status: :unprocessable_entity }
+          @update_error = true
+          @update_error_message = @water_billing.errors
         end
+      rescue => e
+        @update_error = true
+        @update_error_message = e
+        render status: :bad_request
       end
     end
   
     # DELETE /water_billings/1 or /water_billings/1.json
     def destroy
-      @water_billing.destroy!
-  
-      respond_to do |format|
-        format.html { redirect_to water_billing_index_path, notice: "Water billing was successfully destroyed." }
-        format.json { head :no_content }
+      begin
+        @water_billing.destroy!
+        render status: :no_content
+      rescue => e
+        render json: {error:{message:e.message}}, status: :bad_request
       end
     end
   
     def upload_image
-      photo = @water_billing.photos.find_by(name: upload_image_params["name"])
-      if photo.nil?
-          @water_billing.photos.create(name: upload_image_params["name"], image: upload_image_params["image"])
-      else
-          photo.destroy
-          @water_billing.photos.create(name: upload_image_params["name"], image: upload_image_params["image"])
-      end
-  
-      respond_to do |format|
-        unless @water_billing.nil?
-          format.html { redirect_to water_billing_index_path({subdivision_id: @water_billing.subdivision_id}), notice: "Water Billing was successfully created." }
-          format.json { render :show, status: :updated, location: @water_billing }
+      begin
+        photo = @water_billing.photos.find_by(name: upload_image_params["name"])
+        if photo.nil?
+            @water_billing.photos.create(name: upload_image_params["name"], image: upload_image_params["image"])
         else
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @water_billing.errors, status: :unprocessable_entity }
+            photo.destroy
+            @water_billing.photos.create(name: upload_image_params["name"], image: upload_image_params["image"])
         end
+        @total_current_reading = WaterBillingTransactionRepository.sum_current_reading_by_month(@water_billing.year || Time.now.year)
+      rescue => e
+        @upload_image_error = true
+        @upload_image_error_message = e
+        render status: :bad_request
       end
     end
   
     private
       # Use callbacks to share common setup or constraints between actions.
       def set_water_billing
-        @water_billing = WaterBilling.find(params[:id])
+        begin
+          @water_billing = WaterBilling.find(params[:id])
+        rescue => e
+          render json: {error:{message:e.message}}, status: 404
+        end
       end
   
       # Only allow a list of trusted parameters through.
