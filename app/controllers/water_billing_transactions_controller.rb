@@ -16,11 +16,7 @@ class WaterBillingTransactionsController < ApplicationController
     # PATCH/PUT /water_billing_transactions/1 or /water_billing_transactions/1.json
     def update
       params = WaterBillingTransactionRepository.calculate_bill_amount(@water_billing_transaction, water_billing_transaction_params)
-      if @water_billing_transaction.update(params)
-        render json: @water_billing_transaction.to_json, status: :ok
-      else
-        render json: @water_billing_transaction.errors, status: :unprocessable_entity 
-      end
+      @update_valid = @water_billing_transaction.update(params) 
     end
   
     # DELETE /water_billing_transactions/1 or /water_billing_transactions/1.json
