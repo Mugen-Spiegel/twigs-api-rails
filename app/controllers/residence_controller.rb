@@ -6,8 +6,6 @@ class ResidenceController < ApplicationController
     def index
         residence_repositories = ResidenceRepositories.new(params, subdivision)
         @residence =  residence_repositories.search_residence
-        complete_url = request.original_url
-        @sign_in_url = "subdivision_setting/" + subdivision.uuid + "/prepare_register_link"
     end
 
     def show
@@ -15,8 +13,8 @@ class ResidenceController < ApplicationController
     end
 
     def create
-      @user = ResidenceRepositories.create(param_create, subdivision)
-      unless @user.valid?
+      @residence = ResidenceRepositories.create(param_create, subdivision)
+      unless @residence.valid?
         render status: :bad_request
       end
     end
