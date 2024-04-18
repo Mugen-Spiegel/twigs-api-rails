@@ -60,6 +60,35 @@ class User < ApplicationRecord
         .group("users.id")
     end
 
+    scope :search_residence, -> (subdivision_id, where_like_clause) do 
+        u2 = User.left_joins(:monthly_due_transactions, :water_billing_transactions)
+        .where(subdivision_id: subdivision_id)
+        .where(where_like_clause)
+        .or(MonthlyDueTransaction.where(is_paid: [UN_PAID, PARTIAL]))
+        .or(WaterBillingTransaction.where(is_paid: [UN_PAID, PARTIAL]))
+        .select("
+            users.id,
+            users.first_name,
+            users.middle_name,
+            users.last_name,
+            users.block,
+            users.lot,
+            users.street,
+            users.admin,
+            SUM(CASE
+                WHEN monthly_due_transactions.is_paid='unpaid' THEN 
+                COALESCE(monthly_due_transactions.bill_amount,0)
+                ELSE (COALESCE(monthly_due_transactions.bill_amount,0) - COALESCE(monthly_due_transactions.paid_amount,0))
+            END) as monthly_due_transactions_balance,
+            SUM(CASE
+                WHEN water_billing_transactions.is_paid='unpaid' THEN 
+                COALESCE(water_billing_transactions.bill_amount,0)
+                ELSE (COALESCE(water_billing_transactions.bill_amount,0) - COALESCE(water_billing_transactions.paid_amount,0))
+            END) as water_billing_transactions_balance
+                ")
+        .group("users.id")
+    end
+
     scope :user_yearly_monthly_due_bill, -> (user_id, year) do
         joins(:monthly_due_transactions)
         .where(id: user_id, "monthly_due_transactions.year": year)
