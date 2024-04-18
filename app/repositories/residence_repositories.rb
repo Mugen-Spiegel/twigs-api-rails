@@ -28,20 +28,7 @@ class ResidenceRepositories
             self.where_like_clause += "street LIKE '%#{self.street.downcase}%'" 
         end
 
-        User.select("uuid,
-            id,
-            first_name,
-            middle_name,
-            last_name,
-            block,
-            lot,
-            street,
-            admin
-
-        ")
-        .where(self.where_like_clause)
-        .where("subdivision_id = ?", self.subdivision_id)
-        
+        User.search_residence(self.subdivision_id, self.where_like_clause)
     end
 
     def and_where
