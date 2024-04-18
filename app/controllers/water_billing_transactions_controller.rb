@@ -15,8 +15,15 @@ class WaterBillingTransactionsController < ApplicationController
   
     # PATCH/PUT /water_billing_transactions/1 or /water_billing_transactions/1.json
     def update
-      params = WaterBillingTransactionRepository.calculate_bill_amount(@water_billing_transaction, water_billing_transaction_params)
-      @update_valid = @water_billing_transaction.update(params) 
+      begin
+        params = WaterBillingTransactionRepository.calculate_bill_amount(@water_billing_transaction, water_billing_transaction_params)
+        @update_valid = @water_billing_transaction.update(params) 
+      rescue StandardError => e
+        @update_valid = false
+        @validation_error_message = e
+      end
+
+      
     end
   
     # DELETE /water_billing_transactions/1 or /water_billing_transactions/1.json
@@ -32,7 +39,11 @@ class WaterBillingTransactionsController < ApplicationController
     private
       # Use callbacks to share common setup or constraints between actions.
       def set_water_billing_transaction
-        @water_billing_transaction = WaterBillingTransaction.find(params[:id])
+        begin
+          @water_billing_transaction = WaterBillingTransaction.find(params[:id])
+        rescue => e
+          render json: {error:{message:e.message}}, status: 404
+        end
       end
   
       # Only allow a list of trusted parameters through.
