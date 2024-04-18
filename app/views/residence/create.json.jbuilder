@@ -1,10 +1,10 @@
 
-unless @user.valid?
+unless @residence.valid?
     json.error do
-        json.message @user.errors
+        json.message @residence.errors
     end
 else
     json.data do
-        json.residence @user
+        json.residence @residence
     end
 end
