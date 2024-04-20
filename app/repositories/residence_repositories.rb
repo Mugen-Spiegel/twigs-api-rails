@@ -38,13 +38,13 @@ class ResidenceRepositories
 
     def self.create(params, subdivision)
         User.create(
-            first_name: params[:first_name]&.downcase,
-            middle_name: params[:middle_name]&.downcase,
-            last_name: params[:last_name]&.downcase,
+            first_name: params[:first_name]&.downcase.squish,
+            middle_name: params[:middle_name]&.downcase.squish,
+            last_name: params[:last_name]&.downcase.squish,
             block: params[:block],
             lot: params[:lot],
-            street: params[:street]&.downcase,
-            email: params[:email]&.downcase,
+            street: params[:street]&.downcase.squish,
+            email: params[:email]&.downcase.squish,
             password: params[:password],
             password_confirmation:  params[:password_confirmation],
             subdivision_id: subdivision.id,
