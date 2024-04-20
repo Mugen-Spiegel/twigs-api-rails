@@ -67,11 +67,11 @@ class MonthlyDueTransactionRepository
     end
 
     def self.create_monthly_due_transaction(subdivision_id)
-        current_month = MonthlyDueTransaction.where(year: Time.now.year, month: Date::MONTHNAMES[Time.now.month])
-        puts current_month
+        current_month = current_monthly_dues
         monthly_due_transaction = []
         monthly_due = subdivision_monthly_due(subdivision_id)
-        unless monthly_due.nil? || !(current_month.nil?)
+
+        if monthly_due.present? && current_month.empty?
             User.where(subdivision_id: subdivision_id, admin: false).each do |user|
                 monthly_due_transaction << {
                     is_paid: MonthlyDueTransaction::UN_PAID,
@@ -84,6 +84,7 @@ class MonthlyDueTransactionRepository
             end
     
             ids = MonthlyDueTransaction.insert_all(monthly_due_transaction)
+            current_monthly_dues
         else
             unless current_month.nil?
                 raise StandardError.new("#{Date::MONTHNAMES[Time.now.month]} monthly dues already existing")
@@ -97,4 +98,22 @@ class MonthlyDueTransactionRepository
         MonthlyDue.where(subdivision_id: subdivision_id, is_current: "true").first
     end
 
+    def self.current_monthly_dues
+        MonthlyDueTransaction.where(year: Time.now.year, month: Date::MONTHNAMES[Time.now.month])
+    end
+
+
+    def self.prepaire_update_params(monthly_due_transaction, params)
+        unless params["paid_amount"].nil?
+            params["paid_amount"] = (params["paid_amount"].to_f  + monthly_due_transaction.paid_amount).round(2)
+            if ( params["paid_amount"].to_f == monthly_due_transaction.bill_amount )
+                params["is_paid"] = WaterBillingTransaction::PAID
+            elsif ( params["paid_amount"].to_f > monthly_due_transaction.bill_amount )
+                raise StandardError.new("Paid Amount should not greater than bill amount")
+            else
+                params["is_paid"] = WaterBillingTransaction::PARTIAL
+            end
+        end
+        params
+    end
 end
