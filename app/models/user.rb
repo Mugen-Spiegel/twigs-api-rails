@@ -10,7 +10,7 @@ class User < ApplicationRecord
     has_many :monthly_due_transactions
     validates :email, uniqueness: true
     validates :block, :lot, uniqueness: { scope: %i[block lot subdivision_id], message: "block and lot is already exist" }
-    validates :first_name, :middle_name, :last_name, :block, :lot, :street, presence: true
+    validates :first_name, :middle_name, :last_name, :block, :lot, :street, :email, presence: true
     scope :all_users_with_latest_transactions, ->(year, month) do
         if month > 1
             month -= 1
@@ -68,6 +68,7 @@ class User < ApplicationRecord
         .or(WaterBillingTransaction.where(is_paid: [UN_PAID, PARTIAL]))
         .select("
             users.id,
+            users.uuid,
             users.first_name,
             users.middle_name,
             users.last_name,
