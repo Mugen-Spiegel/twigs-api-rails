@@ -4,6 +4,6 @@ unless @water_billing.valid?
     end
 else
     json.data do
-        json.residence @water_billing
+        json.water_billing @water_billing
     end
 end
