@@ -1,5 +1,7 @@
 class MonthlyDuesTransactionsController < ApplicationController
 
+    before_action :monthly_due_transaction, only: %i[update]
+
     def index
         begin
             @monthly_dues_transactions = MonthlyDueTransactionRepository.new(monthly_due_transaction_params, subdivision.id)
@@ -22,7 +24,32 @@ class MonthlyDuesTransactionsController < ApplicationController
         end
     end
 
+    def update
+        begin
+            params = MonthlyDueTransactionRepository.prepaire_update_params(monthly_due_transaction, param_update)
+            puts params
+            unless @monthly_due_transaction.update!(params)
+                @update_error = true
+                @update_error_message = @monthly_due_transaction.errors
+            end
+        rescue => e
+            @update_error = true
+            @update_error_message = e
+            logger.debug e
+            logger.debug e.backtrace.join("\n")
+            render status: :bad_request
+        end
+    end
+
     private
+
+    def monthly_due_transaction
+        begin
+            @monthly_due_transaction = MonthlyDueTransaction.find_by(id: params[:id])
+        rescue => e
+            render json: {error:{message:e.message}}, status: 404
+        end
+    end
 
     def monthly_due_transaction_params
         params.permit(
@@ -35,9 +62,11 @@ class MonthlyDuesTransactionsController < ApplicationController
             :subdivision_uuid
         )
     end
+    def param_update
+        params.require(:monthly_due_transaction).permit(
+            :paid_amount
+        )
+    end
 
-    # def create_monthly_due_transaction_params
-    #     params.require(:month)
-    # end
 end
  
