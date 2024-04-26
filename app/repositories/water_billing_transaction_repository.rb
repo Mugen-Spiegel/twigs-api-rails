@@ -126,7 +126,7 @@ class WaterBillingTransactionRepository
 
     def self.calculate_bill_amount(water_billing_transaction, params)
         unless params["paid_amount"].nil?
-            params["paid_amount"] = (params["paid_amount"].to_f  + water_billing_transaction.paid_amount).round(2)
+            params["paid_amount"] = (params["paid_amount"].to_f  + (water_billing_transaction.paid_amount || 0)).round(2)
             if ( params["paid_amount"].to_f == water_billing_transaction.bill_amount )
                 params["is_paid"] = WaterBillingTransaction::PAID
             elsif ( params["paid_amount"].to_f > water_billing_transaction.bill_amount )
