@@ -31,8 +31,12 @@ class WaterBillingTransactionRepository
                 COALESCE(t2.bill_amount,0)
                 ELSE (COALESCE(t2.bill_amount,0) - COALESCE(t2.paid_amount,0)) 
             END as balance,
-            CONCAT('Block ', users.block, ' Lot ', users.lot, ' ', users.street, ' Street') AS address,
-            CONCAT(users.first_name,' ', users.last_name) AS name,
+            users.block,
+            users.lot,
+            users.street,
+            users.first_name,
+            users.middle_name,
+            users.last_name,
             users.id AS user_id,
             CAST(water_billing_transactions.current_reading AS int) AS current_reading,
             CAST(water_billing_transactions.previous_reading AS int) AS previous_reading,
