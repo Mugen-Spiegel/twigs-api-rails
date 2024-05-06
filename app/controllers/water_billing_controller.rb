@@ -30,20 +30,13 @@ class WaterBillingController < ApplicationController
     def update
       begin
         updates_billing_params = WaterBillingRepository.set_up_update_param(@water_billing, water_billing_params)
-        unless updates_billing_params[:bill_amount].nil?
-          attri = :bill_amount
-        else
-          attri = :paid_amount
-        end
-        if @water_billing.update_attribute(attri, updates_billing_params[attri])
-          @total_current_reading = WaterBillingTransactionRepository.sum_current_reading_by_month(@water_billing.year || Time.now.year)
-        else
-          @update_error = true
-          @update_error_message = @water_billing.errors
-        end
+        @water_billing.update(updates_billing_params)
+        @total_current_reading = WaterBillingTransactionRepository.sum_current_reading_by_month(@water_billing.year || Time.now.year)
       rescue => e
         @update_error = true
         @update_error_message = e
+        logger.debug e
+        logger.debug e.backtrace.join("\n")
         render status: :bad_request
       end
     end
