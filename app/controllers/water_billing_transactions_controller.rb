@@ -21,6 +21,8 @@ class WaterBillingTransactionsController < ApplicationController
       rescue StandardError => e
         @update_valid = false
         @validation_error_message = e
+        logger.debug e
+        logger.debug e.backtrace.join("\n")
       end
 
       
