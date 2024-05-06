@@ -80,9 +80,17 @@ class WaterBillingRepository
 
     def self.set_up_update_param(water_billing, params)
         unless params["paid_amount"].nil?
-            params["paid_amount"] = water_billing.paid_amount + params["paid_amount"].to_f
-        end
+            params["paid_amount"] = (params["paid_amount"].to_f  + (water_billing.paid_amount || 0)).round(2)
+            if ( params["paid_amount"].to_f == water_billing.bill_amount )
+                params["is_paid"] = WaterBillingTransaction::PAID
+            elsif ( params["paid_amount"].to_f > water_billing.bill_amount )
+                raise StandardError.new("Paid amount should not greater than bill amount")
+            else
+                params["is_paid"] = WaterBillingTransaction::PARTIAL
+            end
         
+        end
+
         params
     end
 end
