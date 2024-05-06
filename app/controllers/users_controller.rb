@@ -1,8 +1,5 @@
 class UsersController < ApplicationController
 
-    def create
-
-    end
 
     def login
         user = User.find_by(username: login_params[:username])
